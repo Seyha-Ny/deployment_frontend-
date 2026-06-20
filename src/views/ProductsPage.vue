@@ -13,8 +13,7 @@ const submitting = ref(false)
 async function fetchProducts() {
   loading.value = true
   try {
-    const { data } = await productsApi.index()
-    products.value = data.data
+    products.value = await productsApi.index()
   } catch (e) {
     console.error(e)
   } finally {
@@ -24,8 +23,7 @@ async function fetchProducts() {
 
 async function fetchCategories() {
   try {
-    const { data } = await categoriesApi.index()
-    categories.value = data.data
+    categories.value = await categoriesApi.index()
   } catch (e) {
     console.error(e)
   }
