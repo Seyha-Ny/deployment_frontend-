@@ -2,13 +2,17 @@
 import { ref } from 'vue'
 import CategoriesPage from './views/CategoriesPage.vue'
 import ProductsPage from './views/ProductsPage.vue'
+import { useNotifications } from './notifications.js'
 
 const activeTab = ref('categories')
+const { notifications } = useNotifications()
 </script>
 
 <template>
   <div class="app-container">
-    <h1>Admin Dashboard</h1>
+    <header class="app-header">
+      <h1>Admin Dashboard</h1>
+    </header>
     <nav class="tabs">
       <button
         :class="['tab', { active: activeTab === 'categories' }]"
@@ -27,6 +31,16 @@ const activeTab = ref('categories')
       <CategoriesPage v-if="activeTab === 'categories'" />
       <ProductsPage v-if="activeTab === 'products'" />
     </main>
+
+    <div class="notifications-container">
+      <div
+        v-for="n in notifications"
+        :key="n.id"
+        :class="['notification', 'notification-' + n.type]"
+      >
+        {{ n.message }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -49,8 +63,11 @@ body {
   padding: 2rem;
 }
 
-h1 {
+.app-header {
   margin-bottom: 1.5rem;
+}
+
+.app-header h1 {
   color: #2c3e50;
 }
 
@@ -261,5 +278,53 @@ textarea.form-control {
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+/* ===== Notifications ===== */
+.notifications-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+}
+
+.notification {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-error {
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #f5c6cb;
+}
+
+.notification-success {
+  background: #e6f4ea;
+  color: #1e7e34;
+  border: 1px solid #c3e6cb;
+}
+
+/* ===== Page wrapper (used by views) ===== */
+.page {
+  width: 100%;
 }
 </style>

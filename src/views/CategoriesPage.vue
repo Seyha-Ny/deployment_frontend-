@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { categoriesApi } from '../api.js'
+import { notify } from '../notifications.js'
 
 const categories = ref([])
 const loading = ref(false)
@@ -13,8 +14,8 @@ async function fetchCategories() {
   loading.value = true
   try {
     categories.value = await categoriesApi.index()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   } finally {
     loading.value = false
   }
@@ -37,13 +38,15 @@ async function submitForm() {
   try {
     if (editing.value) {
       await categoriesApi.update(editing.value, form.value)
+      notify('Category updated successfully.', 'success')
     } else {
       await categoriesApi.store(form.value)
+      notify('Category created successfully.', 'success')
     }
     showForm.value = false
     await fetchCategories()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   } finally {
     submitting.value = false
   }
@@ -53,9 +56,10 @@ async function deleteCategory(id) {
   if (!confirm('Are you sure you want to delete this category?')) return
   try {
     await categoriesApi.destroy(id)
+    notify('Category deleted successfully.', 'success')
     await fetchCategories()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   }
 }
 

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { productsApi, categoriesApi } from '../api.js'
+import { notify } from '../notifications.js'
 
 const products = ref([])
 const categories = ref([])
@@ -14,8 +15,8 @@ async function fetchProducts() {
   loading.value = true
   try {
     products.value = await productsApi.index()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   } finally {
     loading.value = false
   }
@@ -24,8 +25,8 @@ async function fetchProducts() {
 async function fetchCategories() {
   try {
     categories.value = await categoriesApi.index()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   }
 }
 
@@ -50,17 +51,22 @@ function openEdit(product) {
 async function submitForm() {
   submitting.value = true
   try {
-    const payload = { ...form.value }
-    if (payload.stock !== '') payload.stock = Number(payload.stock)
+    const payload = {
+      ...form.value,
+      price: form.value.price !== '' ? Number(form.value.price) : 0,
+      stock: form.value.stock !== '' ? Number(form.value.stock) : 0,
+    }
     if (editing.value) {
       await productsApi.update(editing.value, payload)
+      notify('Product updated successfully.', 'success')
     } else {
       await productsApi.store(payload)
+      notify('Product created successfully.', 'success')
     }
     showForm.value = false
     await fetchProducts()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   } finally {
     submitting.value = false
   }
@@ -70,9 +76,10 @@ async function deleteProduct(id) {
   if (!confirm('Are you sure you want to delete this product?')) return
   try {
     await productsApi.destroy(id)
+    notify('Product deleted successfully.', 'success')
     await fetchProducts()
-  } catch (e) {
-    console.error(e)
+  } catch {
+    // notification handled by api interceptor
   }
 }
 
